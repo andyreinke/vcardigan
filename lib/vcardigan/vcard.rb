@@ -57,7 +57,7 @@ module VCardigan
       if @group
         # If there's a group, add it to the name
         name = "#{@group}.#{name}"
-        
+
         # Reset group to nil
         @group = nil
       end
@@ -137,7 +137,7 @@ module VCardigan
       unless @fields.has_key? name
         @fields[name] = []
       end
-      
+
       # Add the property to the field array
       @fields[name].push(property)
 

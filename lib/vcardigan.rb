@@ -3,6 +3,7 @@ require_relative 'vcardigan/vcard'
 require_relative 'vcardigan/property'
 require_relative 'vcardigan/properties/name_property'
 require_relative 'vcardigan/errors'
+require_relative 'vcardigan/string_utils'
 
 module VCardigan
 

@@ -2,4 +2,6 @@ BEGIN:VCARD
 VERSION:4.0
 N:Strummer;Joe;;;
 FN:Joe Strummer
+NOTE:Line1\\nLine2
+TITLE:Title\;And\,But\\
 END:VCARD

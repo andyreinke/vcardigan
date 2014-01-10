@@ -5,7 +5,7 @@ describe VCardigan::VCard do
   describe '#init' do
     context 'no options' do
       let(:vcard) { VCardigan.create }
-      
+
       it 'should set default version' do
         vcard.version.should == '4.0'
       end
@@ -244,6 +244,14 @@ describe VCardigan::VCard do
         fields.should have_key('n')
         fields.should have_key('fn')
       end
+
+       it 'should unescape newline characters' do
+         vcard.note.first.value.should == "Line1\nLine2"
+       end
+
+       it 'should unescape semicolons, commas and blackslashes' do
+         vcard.title.first.value.should == "Title\;And\,But\\"
+       end
     end
   end
 

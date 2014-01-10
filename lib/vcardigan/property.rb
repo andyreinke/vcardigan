@@ -39,6 +39,9 @@ module VCardigan
           end
         else
           value = parse_value(arg.to_s)
+          #require 'pry'
+          #binding.pry
+          value = vcard_unescape(value)
           add_value(value, valueIdx)
           valueIdx += 1
         end
@@ -47,7 +50,6 @@ module VCardigan
 
     def self.create(vcard, name, *args)
       name = name.to_s.downcase
-      classname = ''
 
       case name
       when 'n'
@@ -64,10 +66,10 @@ module VCardigan
       # Gather the parts
       data = data.strip
       parts = data.split(':', 2)
-      values = parts.last.split(';')
+      values = parts.last.split(';').map{|v| vcard_unescape(v)}
       params = parts.first.split(';')
       name = params.shift
-      
+
       # Create argument array
       args = [vcard, name]
 
@@ -84,9 +86,9 @@ module VCardigan
       # Instantiate a new class with the argument array
       self.create(*args)
     end
-    
+
     def value(idx = 0)
-      @values[idx]
+      vcard_escape(@values[idx])
     end
 
     def param(name)
@@ -110,7 +112,7 @@ module VCardigan
       # Values
       @values.each_with_index do |value, idx|
         property << ';' unless idx === 0
-        property << value
+        property << vcard_escape(value)
       end
 
       line_fold(property)
@@ -149,7 +151,7 @@ module VCardigan
         number = value.to_i
         if number > 0
           value = number
-        else 
+        else
           value = nil if value.downcase == 'false' or value == '0'
           value = 1 if value
         end
@@ -217,6 +219,107 @@ module VCardigan
       out
     end
 
-  end
+    def vcard_escape(value)
+      self.class.vcard_escape(value)
+    end
 
+    ESCAPE_CHARS = [",",";","\\"]
+
+    def self.vcard_escape(string)
+      output = ""
+      in_escape_seq = false
+      string.each_char do |char|
+        if ESCAPE_CHARS.include?(char)
+          output << "\\"
+        end
+        output << char
+      end
+
+      output.gsub(/\r?\n/, "\\n")
+      #string.to_s.gsub(/[^\\]{2}(\\){2}[^\\]{2}|[,;]/, '\\\\\0').gsub(/\r?\n/, "\\\\\\n")
+    end
+
+    def vcard_unescape(value)
+      self.class.vcard_unescape(value)
+    end
+
+    def self.vcard_unescape(cooked)
+
+      #if (cooked == null)
+      #{
+      #        return null;
+      #}
+
+      return nil if cooked.nil?
+
+      #int length = cooked.length();
+
+      length = cooked.length
+
+      #if (length <= 1)
+      #{
+      #        return cooked;
+      #}
+
+      return cooked if (length <= 1)
+
+      #StringBuilder result = null;
+
+      result = nil
+
+      #int pos;
+      #int start = 0;
+
+      pos = start = 0;
+
+      #while ((pos = cooked.indexOf(escapeChar, start)) >= 0)
+      #{
+
+      while ((pos = cooked.index(escapeChar, start)) >= 0)
+
+      #        result.append(cooked, start, pos);
+        result.append(cooked, start, pos)
+
+      #        if (pos + 1 < length)
+      #        {
+      #                char c = cooked.charAt(pos + 1);
+      #                if (replacements != null && replacements.containsKey((int) c))
+      #                {
+      #                        Integer replacement = replacements.get((int) c);
+      #                        if (replacement != null)
+      #                        {
+      #                                result.append((char) (int) replacement);
+      #                        }
+      #                }
+      #                else
+      #                {
+      #                        result.append(c);
+      #                }
+      #        }
+      #        else
+      #        {
+      #                // was the last character of cooked, we keep it since it doesn't escape any other character
+      #                result.append(escapeChar);
+      #        }
+      #        // skip escape character and escaped character
+      #        start = pos + 2;
+      #}
+
+      #if (start == 0)
+      #{
+      #        // no escaped characters found, return original string
+      #        return cooked;
+      #}
+      #else
+      #{
+      #        if (start < length)
+      #        {
+      #                // append remainder
+      #                result.append(cooked.substring(start));
+      #        }
+
+      #        return result.toString();
+      #}
+    end
+  end
 end
