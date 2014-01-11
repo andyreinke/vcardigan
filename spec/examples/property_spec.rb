@@ -291,6 +291,29 @@ describe VCardigan::Property do
     end
   end
 
+  describe 'encode and decode' do
+
+    context '#decode_text' do
+      it 'should decode' do
+        VCardigan::Property.decode_text('aa,\\n\\n,\\\\\,\\\\a\;\;b').equal?("aa,\n\n,\\,\\a;;b")
+      end
+    end
+
+    it 'should encode and decode text' do
+      enc_in = "+\\\\+\\n+\\N+\\,+\\;+\\a+\\b+\\c+"
+      dec = VCardigan::Property.decode_text(enc_in)
+      #puts("<#{enc_in}> => <#{dec}>")
+      dec.equal?("+\\+\n+\n+,+;+a+b+c+")
+      enc_out = VCardigan::Property.encode_text(dec)
+      should_be = "+\\\\+\\n+\\n+\\,+\\;+a+b+c+"
+      # Note a, b, and c are allowed to be escaped, but shouldn't be and
+      # aren't in output
+      #puts("<#{dec}> => <#{enc_out}>")
+      enc_out.equal?(should_be)
+    end
+
+  end
+
   def get_value(vcard, field)
     vcard.send(field).first.to_s.split(":", 2).last
   end

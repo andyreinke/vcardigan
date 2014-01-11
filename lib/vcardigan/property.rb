@@ -223,103 +223,43 @@ module VCardigan
       self.class.vcard_escape(value)
     end
 
-    ESCAPE_CHARS = [",",";","\\"]
-
-    def self.vcard_escape(string)
-      output = ""
-      in_escape_seq = false
-      string.each_char do |char|
-        if ESCAPE_CHARS.include?(char)
-          output << "\\"
-        end
-        output << char
-      end
-
-      output.gsub(/\r?\n/, "\\n")
-      #string.to_s.gsub(/[^\\]{2}(\\){2}[^\\]{2}|[,;]/, '\\\\\0').gsub(/\r?\n/, "\\\\\\n")
+    def self.vcard_escape(str)
+      encode_text(str)
     end
 
     def vcard_unescape(value)
       self.class.vcard_unescape(value)
     end
 
-    def self.vcard_unescape(cooked)
-
-      #if (cooked == null)
-      #{
-      #        return null;
-      #}
-
-      return nil if cooked.nil?
-
-      #int length = cooked.length();
-
-      length = cooked.length
-
-      #if (length <= 1)
-      #{
-      #        return cooked;
-      #}
-
-      return cooked if (length <= 1)
-
-      #StringBuilder result = null;
-
-      result = nil
-
-      #int pos;
-      #int start = 0;
-
-      pos = start = 0;
-
-      #while ((pos = cooked.indexOf(escapeChar, start)) >= 0)
-      #{
-
-      while ((pos = cooked.index(escapeChar, start)) >= 0)
-
-      #        result.append(cooked, start, pos);
-        result.append(cooked, start, pos)
-
-      #        if (pos + 1 < length)
-      #        {
-      #                char c = cooked.charAt(pos + 1);
-      #                if (replacements != null && replacements.containsKey((int) c))
-      #                {
-      #                        Integer replacement = replacements.get((int) c);
-      #                        if (replacement != null)
-      #                        {
-      #                                result.append((char) (int) replacement);
-      #                        }
-      #                }
-      #                else
-      #                {
-      #                        result.append(c);
-      #                }
-      #        }
-      #        else
-      #        {
-      #                // was the last character of cooked, we keep it since it doesn't escape any other character
-      #                result.append(escapeChar);
-      #        }
-      #        // skip escape character and escaped character
-      #        start = pos + 2;
-      #}
-
-      #if (start == 0)
-      #{
-      #        // no escaped characters found, return original string
-      #        return cooked;
-      #}
-      #else
-      #{
-      #        if (start < length)
-      #        {
-      #                // append remainder
-      #                result.append(cooked.substring(start));
-      #        }
-
-      #        return result.toString();
-      #}
+    def self.vcard_unescape(str)
+      decode_text(str)
     end
+
+    # Convert RFC 2425 text into a String.
+    # \\ -> \
+    # \n -> NL
+    # \N -> NL
+    # \, -> ,
+    # \; -> ;
+    #
+    # I've seen double-quote escaped by iCal.app. Hmm. Ok, if you aren't supposed
+    # to escape anything but the above, everything else is ambiguous, so I'll
+    # just support it.
+    def self.decode_text(v) # :nodoc:
+      # FIXME - I think this should trim leading and trailing space
+      v.gsub(/\\(.)/) do
+        case $1
+          when "n", "N"
+            "\n"
+          else
+            $1
+        end
+      end
+    end
+
+    def self.encode_text(v) #:nodoc:
+      v.to_str.gsub(/[\\,;]/, '\\\\\0').gsub(/\r?\n/, "\\n")
+    end
+
   end
 end
